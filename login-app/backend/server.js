@@ -41,41 +41,6 @@ app.get('/', (req, res) => {
   res.send('Hello from the backend server!');
 });
 
-
-// app.post('/login', (req, res) => {
-//   const { username, password } = req.body; // 
-
-//   const user = users.find(u => u.username === username && u.password === password);
-  
-//   if (user) {
-//     res.json({ message: "Login successful", user: user.username });
-//   } else {
-//     res.status(401).json({ message: "Incorrect username or password" });
-//   }
-// });
-
-// app.post('/login',cors(), (req, res) => {
-//   // Extract username and password from request body
-//   const { username, password } = req.body;
-
-//   // SQL query to find the user with the given username and password
-//   const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-
-//   db.query(query, [username, password], (err, results) => {
-//     if (err) {
-//       res.status(500).send('Error checking user credentials');
-//       return;
-//     }
-
-//     if (results.length >0) {
-//       res.status(200).send('Login successful');
-//     } 
-//     else {
-//       res.status(401).send('Incorrect username or password');
-//     }
-//   });
-// });
-
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 

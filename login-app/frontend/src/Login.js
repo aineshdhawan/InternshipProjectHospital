@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useHistory } from 'react-router-dom';
+
 import {
   TextField,
   Button,
   Typography,
-  Link,
   AppBar,
   Toolbar,
   Container,
@@ -16,6 +18,7 @@ function Login({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  let history = useHistory();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +36,8 @@ function Login({ onLogin }) {
       const { accessToken } = await response.json();
       localStorage.setItem("accessToken", accessToken); // Store the token
       onLogin(true); // Update the parent component or context provider
+      history.push('/home');
+      
     } catch (error) {
       console.error("Fetch error: " + error.message);
       setError("Login failed. Please try again.");
@@ -103,14 +108,7 @@ function Login({ onLogin }) {
                 </Link>
               </Typography>
               <Typography variant="body1">
-                Don't have an account?{" "}
-                <Link
-                  component="button"
-                  variant="body2"
-                  underline="hover"
-                >
-                  Register here
-                </Link>
+                Don’t have an account? <Link to="/register">Register here</Link>
               </Typography>
             </form>
           </CardContent>
@@ -140,8 +138,6 @@ export default Login;
 //   const [password, setPassword] = useState('');
 //   const [error, setError] = useState('');
 
-  
-
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
 //     try {
@@ -151,7 +147,7 @@ export default Login;
 //         body: JSON.stringify({ username, password }),
 //         credentials: 'include',
 //       });
-  
+
 //       if (!response.ok) {
 //         throw new Error(`HTTP error! status: ${response.status}`);
 //       }
@@ -213,7 +209,7 @@ export default Login;
 //                 </Link>
 //               </Typography>
 //               <Typography variant="body2" align="left" sx={{ mt: 2 }}>
-//                 Don't have an account? 
+//                 Don't have an account?
 //                 <Link href="#" onClick={handleLogout} underline="hover">
 //                   Sign up here
 //                 </Link>
@@ -257,7 +253,7 @@ export default Login;
 //         <TextField label="Password" variant="outlined" fullWidth required margin="normal" type="password" />
 //         <TextField label="Personal Phone Number" variant="outlined" fullWidth required margin="normal" />
 //         <TextField label="Date of Birth" variant="outlined" fullWidth required margin="normal" type="date" InputLabelProps={{ shrink: true }} />
-        
+
 //         {/* Gender Radio Buttons */}
 //         <FormControl component="fieldset" margin="normal" fullWidth>
 //           <FormLabel component="legend">Gender</FormLabel>
@@ -267,7 +263,7 @@ export default Login;
 //             <FormControlLabel value="other" control={<Radio />} label="Other" />
 //           </RadioGroup>
 //         </FormControl>
-        
+
 //         <TextField label="Address" variant="outlined" fullWidth required margin="normal" multiline />
 //         <TextField label="Emergency Contact Name" variant="outlined" fullWidth required margin="normal" />
 //         <TextField label="Emergency Contact Relation" variant="outlined" fullWidth required margin="normal" />
@@ -288,7 +284,7 @@ export default Login;
 //        </Typography>
 //        </footer>
 //     </Container>
-   
+
 //   );
 // }
 
