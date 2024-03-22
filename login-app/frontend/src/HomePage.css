@@ -1,0 +1,29 @@
+.card {
+    width: 80%;
+    max-width: 600px; /* Adjusted for more content */
+    background-color: #f0f0f0;
+    padding: 50px;
+    margin: 100px auto 0;
+    margin-bottom: 40px;
+  }
+  
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .dashboard-placeholder {
+    width: 100%;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: #e0e0e0; /* Slightly different to distinguish */
+    text-align: center;
+  }
+  
+  .footer {
+    margin-top: 20px;
+    text-align: center;
+    padding-bottom: 20px;
+  }
+  

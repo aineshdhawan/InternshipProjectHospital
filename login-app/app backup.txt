@@ -1,0 +1,49 @@
+import React, { useState } from 'react';
+import Login from './Login'; 
+import Registration from './Registration';
+import HomePage from './HomePage'; 
+
+// function App() {
+//   const [user, setUser] = useState(null); 
+
+//   const handleLogin = (username) => {
+//     setUser(username); 
+//   };
+//   const handleLogout = () => {setUser(null); 
+//   };
+function App() {
+  const [user, setUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState('login');
+
+  const handleLoginSuccess = (token) => {
+      setUser({ loggedIn: true });
+      setCurrentPage('home');
+  };
+
+  const handleLogout = () => {
+    setUser(null); 
+    setCurrentPage('login');
+  };
+
+  const navigateToRegistration = () => {
+    setCurrentPage('register'); 
+  };
+
+  const navigateToLogin = () => {
+    setCurrentPage('login'); 
+
+  return (
+    <div>
+      {currentPage === 'home' && user ? (
+
+        <HomePage user={user} onLogout={handleLogout} />
+      ) : currentPage === 'register' ? (
+        <Registration onNavigate={navigateToLogin} />
+      ) : (
+        <Login onLogin={handleLoginSuccess} onNavigateToRegister={navigateToRegistration} />
+      )}
+    </div>
+  );
+}
+}
+export default App;
