@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useHistory } from 'react-router-dom';
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+
 
 import {
   TextField,
@@ -17,6 +19,7 @@ import "./Login.css";
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState('');
   const [error, setError] = useState("");
   let history = useHistory();
 
@@ -26,7 +29,7 @@ function Login({ onLogin }) {
       const response = await fetch("http://localhost:3001/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, role }),
         credentials: "include",
       });
 
@@ -37,7 +40,7 @@ function Login({ onLogin }) {
       localStorage.setItem("accessToken", accessToken); // Store the token
       onLogin(true); // Update the parent component or context provider
       history.push('/home');
-      
+
     } catch (error) {
       console.error("Fetch error: " + error.message);
       setError("Login failed. Please try again.");
@@ -87,6 +90,20 @@ function Login({ onLogin }) {
                 onChange={(e) => setPassword(e.target.value)}
                 margin="normal"
               />
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="role-select-label">Role</InputLabel>
+                <Select
+                  labelId="role-select-label"
+                  id="role-select"
+                  value={role}
+                  label="Role"
+                  onChange={(e) => setRole(e.target.value)}
+                >
+                  <MenuItem value={'doctor'}>Doctor</MenuItem>
+                  <MenuItem value={'patient'}>Patient</MenuItem>
+                </Select>
+              </FormControl>
+
               <Button
                 sx={{ mt: 3, mb: 2 }}
                 type="submit"

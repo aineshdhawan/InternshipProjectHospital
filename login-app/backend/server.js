@@ -41,8 +41,52 @@ app.get('/', (req, res) => {
   res.send('Hello from the backend server!');
 });
 
+app.post('/register', (req, res) => {
+  // Destructure the relevant information from the request body
+  const {
+    username,
+    email,
+    password, // Password will be saved as plain text (insecure!)
+    phoneNumber,
+    dob, // Ensure this is in the format that your DB accepts, e.g., YYYY-MM-DD
+    gender,
+    address,
+    emergencyContactName,
+    emergencyContactRelation,
+    emergencyContactPhoneNumber,
+  } = req.body;
+
+  // Construct the SQL query to insert the new user
+  const query = `
+    INSERT INTO patient (username, email, password, phoneNumber, dob, gender, address, emergencyContactName, emergencyContactRelation, emergencyContactPhoneNumber)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  `;
+
+  // Execute the SQL query
+  db.query(query, [
+    username,
+    email,
+    password, 
+    phoneNumber,
+    dob,
+    gender,
+    address,
+    emergencyContactName,
+    emergencyContactRelation,
+    emergencyContactPhoneNumber,
+  ], (error, results) => {
+    if (error) {
+      console.error('Error registering new user:', error);
+      res.status(500).json({ message: 'Error registering new user', error });
+    } else {
+      res.status(201).json({ message: 'New user registered', userId: results.insertId });
+    }
+  });
+});
+
+
 app.post('/login', (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
 
   // SQL query to find the user with the given username and password
   const query = 'SELECT * FROM users WHERE username = ? AND password = ?';

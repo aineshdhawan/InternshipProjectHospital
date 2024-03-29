@@ -4,11 +4,14 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-d
 import HomePage from "./HomePage";
 import Registration from "./Registration";
 import ProtectedRoute from "./ProtectedRoute";
+import { jwtDecode } from "jwt-decode";
 
 // function App() {
   
 //       // Optionally, redirect the user or fetch user data
 //
+
+
 
 function App() {
 
@@ -34,6 +37,16 @@ function App() {
   </Router>
   );
 }
+
+
+function getUserRole() {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return null;
+  const { role } = jwtDecode(token);
+  return role;
+}
+
+
 
 export default App;
 
