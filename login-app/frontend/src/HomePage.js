@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { useHistory } from "react-router-dom";
 import {
   AppBar,
@@ -14,9 +14,13 @@ import {
   ListItemText,
   Grid,
 } from "@mui/material";
+import PatientSearch from './PatientSearch';
+
 
 function HomePage({ user }) {
   const drawerWidth = 240;
+
+  const [searchResults, setSearchResults] = useState([]);
   let history = useHistory();
 
   const onLogout = () => {
@@ -46,6 +50,10 @@ function HomePage({ user }) {
           </Button>
         </Toolbar>
       </AppBar>
+
+      
+
+
       <Drawer
         variant="permanent"
         sx={{
@@ -76,29 +84,22 @@ function HomePage({ user }) {
           marginLeft: drawerWidth,
         }}
       >
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-          <Grid container spacing={3}>
-            {/* 4x1 Grid for live figures */}
-            {["Figure 1", "Figure 2", "Figure 3", "Figure 4"].map((figure) => (
-              <Grid item xs={12} sm={6} md={3} key={figure}>
-                <Card
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography gutterBottom variant="h5" component="h2">
-                      {figure}
-                    </Typography>
-                    <Typography>Placeholder data</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
+        <div>
+      <PatientSearch onSearchResult={setSearchResults} />
+      {searchResults.length > 0 
+      // && 
+      // (
+        // <div>
+        //   <h2>Search Results</h2>
+        //   {searchResults.map((patient) => (
+        //     <div key={patient.id}>
+        //       <p>{`ID: ${patient.id}, Name: ${patient.name}, Phone: ${patient.contact_info}`}</p>
+        //     </div>
+        //   ))}
+        // </div>
+      // )
+      }
+    </div>
         <footer className="footer">
           <Typography variant="body2" color="textSecondary" align="center">
             &copy; {new Date().getFullYear()} Hospital Name. All rights

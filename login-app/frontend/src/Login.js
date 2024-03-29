@@ -90,7 +90,7 @@ function Login({ onLogin }) {
                 onChange={(e) => setPassword(e.target.value)}
                 margin="normal"
               />
-              <FormControl fullWidth margin="normal">
+              {/* <FormControl fullWidth margin="normal">
                 <InputLabel id="role-select-label">Role</InputLabel>
                 <Select
                   labelId="role-select-label"
@@ -99,10 +99,10 @@ function Login({ onLogin }) {
                   label="Role"
                   onChange={(e) => setRole(e.target.value)}
                 >
-                  <MenuItem value={'doctor'}>Doctor</MenuItem>
-                  <MenuItem value={'patient'}>Patient</MenuItem>
+                  <MenuItem value={'Doctor'}>Doctor</MenuItem>
+                  <MenuItem value={'Reception Desk'}>Reception Desk</MenuItem>
                 </Select>
-              </FormControl>
+              </FormControl> */}
 
               <Button
                 sx={{ mt: 3, mb: 2 }}
@@ -124,9 +124,9 @@ function Login({ onLogin }) {
                   Forgot password?
                 </Link>
               </Typography>
-              <Typography variant="body1">
+              {/* <Typography variant="body1">
                 Don’t have an account? <Link to="/register">Register here</Link>
-              </Typography>
+              </Typography> */}
             </form>
           </CardContent>
         </Card>
