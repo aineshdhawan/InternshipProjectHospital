@@ -147,8 +147,7 @@ app.post("/login", (req, res) => {
 //   });
 // });
 
-
-app.get('/patients/search', (req, res) => {
+app.get("/patients/search", (req, res) => {
   const { searchQuery } = req.query;
 
   // SQL query to search patients by ID or phone number
@@ -161,13 +160,13 @@ app.get('/patients/search', (req, res) => {
   db.query(query, [searchQuery, `%${searchQuery}%`], (err, results) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ message: 'Error retrieving patient data', error: err });
+      return res
+        .status(500)
+        .json({ message: "Error retrieving patient data", error: err });
     }
     res.json(results);
   });
 });
-
-
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
