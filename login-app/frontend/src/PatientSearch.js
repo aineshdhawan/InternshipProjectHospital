@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+
 import {
   TextField,
   Paper,
@@ -15,7 +17,11 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
+
+
+
 function PatientSearch({ onSearchResult }) {
+  let history = useHistory();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
@@ -28,6 +34,9 @@ function PatientSearch({ onSearchResult }) {
     setSearchResults(data);
     onSearchResult && onSearchResult(data); // Callback to pass results to parent component
   };
+  const handleRowClick = (patientId) => {
+    history.push(`/patients/${patientId}`);
+  };
 
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
@@ -36,8 +45,8 @@ function PatientSearch({ onSearchResult }) {
     }
   };
   const handleRefresh = () => {
-    setSearchQuery(""); 
-    setSearchResults([]); 
+    setSearchQuery("");
+    setSearchResults([]);
   };
 
   return (
@@ -101,6 +110,11 @@ function PatientSearch({ onSearchResult }) {
                   </TableCell>
                   <TableCell align="right">{row.name}</TableCell>
                   <TableCell align="right">{row.contact_info}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleRowClick(row.id)}>
+                      View Details
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

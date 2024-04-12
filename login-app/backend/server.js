@@ -168,6 +168,28 @@ app.get("/patients/search", (req, res) => {
   });
 });
 
+app.get('/patients/:patientId', (req, res) => {
+  const { patientId } = req.params;
+
+  const query = 'SELECT * FROM patients WHERE id = ?';
+
+  db.query(query, [patientId], (err, results) => {
+    if (err) {
+      console.error('Error fetching patient:', err);
+      res.status(500).json({ message: 'Error fetching patient details' });
+      return;
+    }
+
+    if (results.length > 0) {
+      // If a patient is found, send the patient data
+      res.json(results[0]);
+    } else {
+      // If no patient is found, send a 404 response
+      res.status(404).json({ message: 'Patient not found' });
+    }
+  });
+});
+
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];

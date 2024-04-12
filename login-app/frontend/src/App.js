@@ -3,14 +3,9 @@ import Login from "./Login";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import HomePage from "./HomePage";
 import Registration from "./Registration";
+import PatientDetails from './PatientDetails';
 import ProtectedRoute from "./ProtectedRoute";
 import { jwtDecode } from "jwt-decode";
-
-// function App() {
-  
-//       // Optionally, redirect the user or fetch user data
-//
-
 
 
 function App() {
@@ -29,9 +24,10 @@ function App() {
     <Switch>
       <Route path="/login" exact render={(props) => <Login {...props} onLogin={handleLoginSuccess} />} />
       <Route path="/register" component={Registration} />
-      {/* Protect the /home route */}
+  
       <ProtectedRoute path="/home" component={HomePage} user={user} />
-      {/* Redirect based on authentication status */}
+      <Route path="/patients/:patientId" component={PatientDetails} />
+      {/* redirect based on status */}
       <Route path="/" exact render={() => user ? <Redirect to="/home" /> : <Redirect to="/login" />} />
     </Switch>
   </Router>
