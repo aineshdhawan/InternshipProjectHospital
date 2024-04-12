@@ -170,10 +170,11 @@ app.get("/patients/search", (req, res) => {
 
 app.get('/patients/:patientId', (req, res) => {
   const { patientId } = req.params;
-
+  console.log(`Fetching details for patientId: ${patientId}`);
   const query = 'SELECT * FROM patients WHERE id = ?';
 
   db.query(query, [patientId], (err, results) => {
+    console.log(results);
     if (err) {
       console.error('Error fetching patient:', err);
       res.status(500).json({ message: 'Error fetching patient details' });
@@ -188,6 +189,15 @@ app.get('/patients/:patientId', (req, res) => {
       res.status(404).json({ message: 'Patient not found' });
     }
   });
+});
+
+app.put('/patients/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, contact_info } = req.body;
+
+  updatePatientDetails(id, { name, contact_info, medical_history })
+    .then(() => res.json({ message: 'Patient details updated successfully' }))
+    .catch(error => res.status(500).json({ message: 'Error updating patient details', error }));
 });
 
 function authenticateToken(req, res, next) {
