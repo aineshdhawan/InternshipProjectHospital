@@ -9,10 +9,9 @@ app.use(express.json());
 const cors = require("cors");
 const JWT_SECRET = "secret123";
 
-// CORS configuration for specific origin and credentials
 const corsOptions = {
-  origin: "http://localhost:3000", // Specify the origin of your frontend app
-  credentials: true, // To allow cookies and authentication data with requests
+  origin: "http://localhost:3000",
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -39,13 +38,12 @@ app.get("/", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  // Destructure the relevant information from the request body
   const {
     username,
     email,
-    password, // Password will be saved as plain text (insecure!)
+    password,
     phoneNumber,
-    dob, // Ensure this is in the format that your DB accepts, e.g., YYYY-MM-DD
+    dob,
     gender,
     address,
     emergencyContactName,
@@ -53,13 +51,11 @@ app.post("/register", (req, res) => {
     emergencyContactPhoneNumber,
   } = req.body;
 
-  // Construct the SQL query to insert the new user
   const query = `
     INSERT INTO patient (username, email, password, phoneNumber, dob, gender, address, emergencyContactName, emergencyContactRelation, emergencyContactPhoneNumber)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
   `;
 
-  // Execute the SQL query
   db.query(
     query,
     [
@@ -90,7 +86,6 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  // Updated SQL query to join with the roles table to fetch the role name
   const query = `
     SELECT users.*, roles.role_name AS roleName 
     FROM users 
@@ -112,7 +107,7 @@ app.post("/login", (req, res) => {
         {
           id: user.id,
           username: user.username,
-          role: user.roleName, // Including the role name for frontend usage
+          role: user.roleName,
         },
         JWT_SECRET,
         { expiresIn: "1h" }
@@ -150,13 +145,12 @@ app.post("/login", (req, res) => {
 app.get("/patients/search", (req, res) => {
   const { searchQuery } = req.query;
 
-  // SQL query to search patients by ID or phone number
   const query = `
     SELECT * FROM patients 
     WHERE id = ? OR contact_info LIKE ?;
   `;
 
-  // Using '%' for a partial match on phone number
+  // % partial match
   db.query(query, [searchQuery, `%${searchQuery}%`], (err, results) => {
     if (err) {
       console.error(err);
@@ -168,54 +162,79 @@ app.get("/patients/search", (req, res) => {
   });
 });
 
-app.get('/patients/:patientId', (req, res) => {
+app.get("/patients/:patientId", (req, res) => {
   const { patientId } = req.params;
   console.log(`Fetching details for patientId: ${patientId}`);
-  const query = 'SELECT * FROM patients WHERE id = ?';
+  const query = "SELECT * FROM patients WHERE id = ?";
 
   db.query(query, [patientId], (err, results) => {
     console.log(results);
     if (err) {
-      console.error('Error fetching patient:', err);
-      res.status(500).json({ message: 'Error fetching patient details' });
+      console.error("Error fetching patient:", err);
+      res.status(500).json({ message: "Error fetching patient details" });
       return;
     }
 
     if (results.length > 0) {
-      // If a patient is found, send the patient data
       res.json(results[0]);
     } else {
-      // If no patient is found, send a 404 response
-      res.status(404).json({ message: 'Patient not found' });
+      res.status(404).json({ message: "Patient not found" });
     }
   });
 });
 
-app.put('/patients/:id', (req, res) => {
+const updatePatientDetails = (id, { name, contact_info, medical_history }) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      UPDATE patients 
+      SET name = ?, contact_info = ?, medical_history = ?
+      WHERE id = ?;
+    `;
+
+    db.query(
+      query,
+      [name, contact_info, medical_history, id],
+      (error, results) => {
+        if (error) {
+          return reject(error);
+        } else if (results.affectedRows === 0) {
+          return reject(new Error("Patient not found"));
+        } else {
+          return resolve(results);
+        }
+      }
+    );
+  });
+};
+
+app.put("/patients/:id", (req, res) => {
   const { id } = req.params;
-  const { name, contact_info } = req.body;
+  const { name, contact_info, medical_history } = req.body;
+
+  console.log(req.body);
 
   updatePatientDetails(id, { name, contact_info, medical_history })
-    .then(() => res.json({ message: 'Patient details updated successfully' }))
-    .catch(error => res.status(500).json({ message: 'Error updating patient details', error }));
+    .then(() => res.json({ message: "Patient details updated successfully" }))
+    .catch((error) =>
+      res.status(500).json({ message: "Error updating patient details", error })
+    );
 });
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  if (token == null) return res.sendStatus(401); // No token provided
+  if (token == null) return res.sendStatus(401);
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); // Token invalid
+    if (err) return res.sendStatus(403);
 
-    req.user = user; // Add the decoded user payload to the request object
-    next(); // Proceed to the next middleware or route handler
+    req.user = user;
+    next();
   });
 }
 
 app.get("/protected", authenticateToken, (req, res) => {
-  // This route is now protected
   res.json({ message: "This is a protected route", user: req.user });
 });
 

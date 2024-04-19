@@ -24,6 +24,7 @@ function PatientSearch({ onSearchResult }) {
   let history = useHistory();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  
 
   const handleSearch = async () => {
     const response = await fetch(

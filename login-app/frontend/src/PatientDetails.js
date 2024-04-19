@@ -1,17 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Container, Typography, CircularProgress, Paper, List, ListItem, ListItemText, AppBar, Toolbar, Button, TextField } from '@mui/material';
+import { Container, Typography, CircularProgress, Paper, List, ListItem, ListItemText, AppBar, Toolbar, Button, TextField, Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
 
 function PatientDetails({ patient }) {
   let history = useHistory();
   const { patientId } = useParams(); // Extract the patient ID from the URL
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEdit = () => {
+    setIsEditing(true); // Enter edit mode
+  };
+
+const handleCancel = () => {
+    setIsEditing(false); // Exit edit mode without saving
+    // Optionally reset the form to initial values here
+  };
+
+
 
 const [patientDetails, setPatientDetails] = useState({
     name: '',
-    phone: '',
-    medicalhistory: '',
+    contact_info: '',
+    medical_history: '',
     // Add other details you want to be editable
   });
   const [loading, setLoading] = useState(true);
@@ -23,8 +36,10 @@ const [patientDetails, setPatientDetails] = useState({
     setPatientDetails({ ...patientDetails, [name]: value });
   };
 
+
+
   const saveDetails = () => {
-    fetch(`http://localhost:3001/patients/${patient.id}`, {
+    fetch(`http://localhost:3001/patients/${patientId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -40,6 +55,7 @@ const [patientDetails, setPatientDetails] = useState({
         console.error('Error:', error);
         // Optional: Show error message
       });
+      setIsEditing(false);
   };
 
   useEffect(() => {
@@ -120,7 +136,7 @@ const [patientDetails, setPatientDetails] = useState({
     return <Typography>Could not find patient details.</Typography>;
   }
 
-  // Display patient details
+ 
   return (
     <div>
       <AppBar position="fixed">
@@ -133,49 +149,143 @@ const [patientDetails, setPatientDetails] = useState({
           </Button>
         </Toolbar>
       </AppBar>
-      {/* Use a Toolbar here to add spacing equivalent to the AppBar's height */}
-      <Toolbar />
-      <Container>
-        {/* Adding a back button for better navigation */}
-        <Button startIcon={<ArrowBackIcon />} onClick={onNavigateBack} sx={{ my: 2 }}>
-          Back
-        </Button>
-        <Typography variant="h4" gutterBottom>
-          Patient Details
-        </Typography>
-        <Paper elevation={3} sx={{ p: 2 }}>
-        
-        <form noValidate autoComplete="off">
-        <TextField
-          label="Name"
-          name="name"
-          fullWidth
-          margin="normal"
-          value={patientDetails.name}
-          onChange={handleInputChange}
-        />
-        <TextField
-          label="Phone"
-          name="phone"
-          fullWidth
-          margin="normal"
-          value={patientDetails.phone}
-          onChange={handleInputChange}
-        />
-          <Button 
-          startIcon={<SaveIcon />} 
-          variant="contained" 
-          color="primary" 
-          onClick={saveDetails}
-          sx={{ mt: 2 }}
-        >
-          Save
-        </Button>
-      </form>
-
-        </Paper>
-      </Container>
+      {/* Box component to avoid overlap with content below AppBar */}
+      <Box sx={{ pt: 8 }}>
+        <Container>
+          <Button startIcon={<ArrowBackIcon />} onClick={onNavigateBack} sx={{ my: 2 }}>
+            Back
+          </Button>
+          <Typography variant="h4" gutterBottom>
+            Patient Details
+          </Typography>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <form noValidate autoComplete="off">
+              {/* Changed the TextField components */}
+              <TextField
+                label="Name"
+                name="name"
+                fullWidth
+                margin="normal"
+                value={patientDetails.name}
+                onChange={handleInputChange}
+                InputProps={{
+                  readOnly: !isEditing,
+                  style: { borderBottom: isEditing ? '5px solid blue' : 'none' },
+                }}
+              />
+              <TextField
+                label="Contact Info"
+                name="contact_info"
+                fullWidth
+                margin="normal"
+                value={patientDetails.contact_info}
+                onChange={handleInputChange}
+                InputProps={{
+                  readOnly: !isEditing,
+                  style: { borderBottom: isEditing ? '5px solid blue' : 'none' },
+                }}
+              />
+              <TextField
+                label="Medical History"
+                name="medical_history"
+                fullWidth
+                margin="normal"
+                multiline
+                rows={4}
+                value={patientDetails.medical_history}
+                onChange={handleInputChange}
+                InputProps={{
+                  readOnly: !isEditing,
+                  style: { borderBottom: isEditing ? '5px solid blue' : 'none' },
+                }}
+              />
+              {isEditing ? (
+                <>
+                  <Button startIcon={<SaveIcon />} variant="contained" color="primary" onClick={saveDetails} sx={{ mt: 2 }}>
+                    Save
+                  </Button>
+                  <Button variant="outlined" onClick={handleCancel} sx={{ mt: 2, ml: 2 }}>
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button startIcon={<EditIcon />} variant="contained" onClick={handleEdit} sx={{ mt: 2 }}>
+                  Edit
+                </Button>
+              )}
+            </form>
+          </Paper>
+        </Container>
+      </Box>
     </div>
+
+    // <div>
+    //   <AppBar position="fixed" >
+    //      <Toolbar>
+    //        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+    //          Hospital Dashboard
+    //        </Typography>
+    //        <Button color="inherit" onClick={onLogout} sx={{ position: 'absolute', right: 10 }}>
+    //          Logout
+    //        </Button>
+    //      </Toolbar>
+    //  </AppBar>
+    //   <Container>
+    //     <Button startIcon={<ArrowBackIcon />} onClick={onNavigateBack} sx={{ my: 2 }}>
+    //       Back
+    //     </Button>
+    //     <Typography variant="h4" gutterBottom>
+    //       Patient Details
+    //     </Typography>
+    //     <Paper elevation={3} sx={{ p: 2 }}>
+    //       <form noValidate autoComplete="off">
+    //         <TextField
+    //           label="Name"
+    //           name="name"
+    //           fullWidth
+    //           margin="normal"
+    //           value={patientDetails.name}
+    //           onChange={handleInputChange}
+    //           disabled={!isEditing} // Make field editable only in edit mode
+    //         />
+    //          <TextField
+    //           label="Contact Info"
+    //           name="contact_info"
+    //           fullWidth
+    //           margin="normal"
+    //           value={patientDetails.contact_info}
+    //           onChange={handleInputChange}
+    //           disabled={!isEditing}
+    //         />
+    //         <TextField
+    //           label="Medical History"
+    //           name="medical_history"
+    //           fullWidth
+    //           margin="normal"
+    //           multiline
+    //           rows={4}
+    //           value={patientDetails.medical_history}
+    //           onChange={handleInputChange}
+    //           disabled={!isEditing}
+    //         />
+    //         {isEditing ? (
+    //           <>
+    //             <Button startIcon={<SaveIcon />} variant="contained" color="primary" onClick={saveDetails} sx={{ mt: 2 }}>
+    //               Save
+    //             </Button>
+    //             <Button variant="outlined" onClick={handleCancel} sx={{ mt: 2, ml: 2 }}>
+    //               Cancel
+    //             </Button>
+    //           </>
+    //         ) : (
+    //           <Button startIcon={<EditIcon />} variant="contained" onClick={handleEdit} sx={{ mt: 2 }}>
+    //             Edit
+    //           </Button>
+    //         )}
+    //       </form>
+    //     </Paper>
+    //   </Container>
+    // </div>
   );
 }
 
