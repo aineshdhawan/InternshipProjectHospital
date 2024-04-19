@@ -238,6 +238,81 @@ app.get("/protected", authenticateToken, (req, res) => {
   res.json({ message: "This is a protected route", user: req.user });
 });
 
+//calcTimeSlot Function
+
+const timeSlots = {
+  morning: { start: "09:00:00", end: "12:00:00" },
+  evening: { start: "13:00:00", end: "16:00:00" },
+};
+
+function addMinutes(time, minutes) {
+  const parts = time.split(':');
+  const date = new Date();
+  date.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10) + minutes, parseInt(parts[2], 10));
+  return date.toTimeString().split(' ')[0];
+}
+
+function calcTimeSlot(date, timeSlotKey, doctorId, db) {
+  return new Promise((resolve, reject) => {
+    const slot = timeSlots[timeSlotKey];
+    if (!slot) {
+      return reject(new Error("Invalid time slot key"));
+    }
+
+    const query = `
+      SELECT time_slot_start FROM appointments
+      WHERE doctor_id = ? AND appointment_date = ? AND time_slot_start >= ? AND time_slot_start < ?
+      ORDER BY time_slot_start ASC;
+    `;
+
+    db.query(query, [doctorId, date, slot.start, slot.end], (error, results) => {
+      if (error) {
+        return reject(error);
+      }
+
+      let nextAvailableStartTime = slot.start;
+      for (const result of results) {
+        if (nextAvailableStartTime < result.time_slot_start) {
+          break;
+        }
+        nextAvailableStartTime = addMinutes(result.time_slot_start, 10);
+      }
+
+      if (nextAvailableStartTime >= slot.end) {
+        return reject(new Error("No available slots in the selected time slot"));
+      }
+
+      // Calculate endTime by adding 10 minutes to startTime
+      const endTime = addMinutes(nextAvailableStartTime, 10);
+      resolve({ startTime: nextAvailableStartTime, endTime });
+    });
+  });
+}
+
+app.post("/appointments", async (req, res) => {
+  const { patientId, date, timeSlot, department, doctorId } = req.body;
+
+  try {
+    const { startTime, endTime } = await calcTimeSlot(date, timeSlot, doctorId, db);
+    const insertQuery = `
+    INSERT INTO appointments (patient_id, appointment_date, time_slot_start, time_slot_end, department, doctor_id)
+    VALUES (?, ?, ?, ?, ?, ?);
+  `;
+
+  db.query(insertQuery, [patientId, date, startTime, endTime, department, doctorId], (insertError, insertResults) => {
+    if (insertError) {
+      console.error('Error inserting appointment:', insertError);
+      return res.status(500).json({ message: 'Error creating appointment', error: insertError });
+    }
+
+    res.status(201).json({ message: 'Appointment created successfully', appointmentId: insertResults.insertId });
+  });
+  } catch (error) {
+    console.error("Error creating appointment:", error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
