@@ -1,5 +1,6 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+
 import {
   AppBar,
   Toolbar,
@@ -14,8 +15,7 @@ import {
   ListItemText,
   Grid,
 } from "@mui/material";
-import PatientSearch from './PatientSearch';
-
+import PatientSearch from "./PatientSearch";
 
 function HomePage({ user }) {
   const drawerWidth = 240;
@@ -26,9 +26,11 @@ function HomePage({ user }) {
   const onLogout = () => {
     // Clear the token or user data from localStorage or your state management
     localStorage.removeItem("accessToken");
-
-    // Redirect to the login page
     history.push("/login");
+  };
+
+  const navigate = (path) => {
+    history.push(path);
   };
 
   return (
@@ -51,9 +53,6 @@ function HomePage({ user }) {
         </Toolbar>
       </AppBar>
 
-      
-
-
       <Drawer
         variant="permanent"
         sx={{
@@ -67,13 +66,15 @@ function HomePage({ user }) {
       >
         <Toolbar />
         <List>
-          {["Dashboard", "Patients", "Appointments", "Settings"].map(
-            (text, index) => (
-              <ListItem button key={text}>
-                <ListItemText primary={text} />
-              </ListItem>
-            )
-          )}
+          {[
+            { text: "Dashboard", url: "/" },
+            { text: "Register New Patient", url: "/register" },
+            { text: "Appointments", url: "/appointments" },
+          ].map((item) => (
+            <ListItem button key={item.text} onClick={() => navigate(item.url)}>
+              <ListItemText primary={item.text} />
+            </ListItem>
+          ))}
         </List>
       </Drawer>
       <main
@@ -81,25 +82,27 @@ function HomePage({ user }) {
           flexGrow: 1,
           padding: "20px",
           marginTop: "64px",
-          marginLeft: drawerWidth,
+          marginLeft: "15px",
         }}
       >
+        
         <div>
-      <PatientSearch onSearchResult={setSearchResults} />
-      {searchResults.length > 0 
-      // && 
-      // (
-        // <div>
-        //   <h2>Search Results</h2>
-        //   {searchResults.map((patient) => (
-        //     <div key={patient.id}>
-        //       <p>{`ID: ${patient.id}, Name: ${patient.name}, Phone: ${patient.contact_info}`}</p>
-        //     </div>
-        //   ))}
-        // </div>
-      // )
-      }
-    </div>
+          <PatientSearch onSearchResult={setSearchResults} />
+          {
+            searchResults.length > 0
+            // &&
+            // (
+            // <div>
+            //   <h2>Search Results</h2>
+            //   {searchResults.map((patient) => (
+            //     <div key={patient.id}>
+            //       <p>{`ID: ${patient.id}, Name: ${patient.name}, Phone: ${patient.contact_info}`}</p>
+            //     </div>
+            //   ))}
+            // </div>
+            // )
+          }
+        </div>
         <footer className="footer">
           <Typography variant="body2" color="textSecondary" align="center">
             &copy; {new Date().getFullYear()} Hospital Name. All rights

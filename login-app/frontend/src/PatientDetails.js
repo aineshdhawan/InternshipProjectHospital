@@ -150,6 +150,7 @@ const [patientDetails, setPatientDetails] = useState({
         </Toolbar>
       </AppBar>
       {/* Box component to avoid overlap with content below AppBar */}
+      
       <Box sx={{ pt: 8 }}>
         <Container>
           <Button startIcon={<ArrowBackIcon />} onClick={onNavigateBack} sx={{ my: 2 }}>

@@ -39,9 +39,8 @@ app.get("/", (req, res) => {
 
 app.post("/register", (req, res) => {
   const {
-    username,
+    name,
     email,
-    password,
     phoneNumber,
     dob,
     gender,
@@ -52,16 +51,15 @@ app.post("/register", (req, res) => {
   } = req.body;
 
   const query = `
-    INSERT INTO patient (username, email, password, phoneNumber, dob, gender, address, emergencyContactName, emergencyContactRelation, emergencyContactPhoneNumber)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    INSERT INTO patient2 (name, email, phoneNumber, dob, gender, address, emergencyContactName, emergencyContactRelation, emergencyContactPhoneNumber)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
   `;
 
   db.query(
     query,
     [
-      username,
+      name,
       email,
-      password,
       phoneNumber,
       dob,
       gender,
@@ -277,7 +275,7 @@ function calcTimeSlot(date, timeSlotKey, doctorId, db) {
         }
         nextAvailableStartTime = addMinutes(result.time_slot_start, 10);
       }
-
+ 
       if (nextAvailableStartTime >= slot.end) {
         return reject(new Error("No available slots in the selected time slot"));
       }
@@ -290,7 +288,8 @@ function calcTimeSlot(date, timeSlotKey, doctorId, db) {
 }
 
 app.post("/appointments", async (req, res) => {
-  const { patientId, date, timeSlot, department, doctorId } = req.body;
+  const date = new Date(req.body.date).toISOString().slice(0, 10);
+  const { patientId, timeSlot, department, doctorId } = req.body;
 
   try {
     const { startTime, endTime } = await calcTimeSlot(date, timeSlot, doctorId, db);
@@ -312,6 +311,29 @@ app.post("/appointments", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+app.get('/appointments', (req, res) => {
+  const {date} = req.query;
+
+  const query = `
+  SELECT appointment_id, doctor_id, doctor_id, 
+  DATE_FORMAT(appointment_date, '%Y-%m-%d') AS date,
+  time_slot_start, time_slot_end
+  FROM appointments
+  WHERE appointment_date = ?
+  ORDER BY time_slot_start ASC;
+  `;
+
+  db.query(query, [date], (error, results) => {
+    if (error) {
+      console.error('Error fetching appointments:', error);
+      return res.status(500).json({ message: 'Error fetching appointments' });
+    }
+    res.json(results);
+  });
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

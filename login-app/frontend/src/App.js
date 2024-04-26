@@ -1,48 +1,59 @@
 import React, { useState } from "react";
 import Login from "./Login";
-import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from "react-router-dom";
 import HomePage from "./HomePage";
 import Registration from "./Registration";
-import PatientDetails from './PatientDetails';
+import PatientDetails from "./PatientDetails";
 import ProtectedRoute from "./ProtectedRoute";
+import CreateAppointmentForm from "./CreateAppointmentForm";
+import AppointmentsPage from "./AppointmentsPage";
+
 import { jwtDecode } from "jwt-decode";
 
-
 function App() {
-
-
   const [user, setUser] = useState(null);
 
   const handleLoginSuccess = (token) => {
-
-      setUser({ loggedIn: true });
-  }
-
+    setUser({ loggedIn: true });
+  };
 
   return (
     <Router>
-    <Switch>
-      <Route path="/login" exact render={(props) => <Login {...props} onLogin={handleLoginSuccess} />} />
-      <Route path="/register" component={Registration} />
-  
-      <ProtectedRoute path="/home" component={HomePage} user={user} />
-      <Route path="/patients/:patientId" component={PatientDetails} />
-      {/* redirect based on status */}
-      <Route path="/" exact render={() => user ? <Redirect to="/home" /> : <Redirect to="/login" />} />
-    </Switch>
-  </Router>
+      <Switch>
+        <Route
+          path="/login"
+          exact
+          render={(props) => <Login {...props} onLogin={handleLoginSuccess} />}
+        />
+        <Route path="/register" component={Registration} />
+        <Route path="/appointments" component={AppointmentsPage} />
+        <Route path="/create-appointment" component={CreateAppointmentForm} />
+        <ProtectedRoute path="/home" component={HomePage} user={user} />
+        <Route path="/patients/:patientId" component={PatientDetails} />
+        {/* redirect based on status */}
+        <Route
+          path="/"
+          exact
+          render={() =>
+            user ? <Redirect to="/home" /> : <Redirect to="/login" />
+          }
+        />
+      </Switch>
+    </Router>
   );
 }
 
-
 function getUserRole() {
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem("accessToken");
   if (!token) return null;
   const { role } = jwtDecode(token);
   return role;
 }
-
-
 
 export default App;
 

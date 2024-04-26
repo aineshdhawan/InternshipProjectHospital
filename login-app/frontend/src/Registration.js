@@ -1,25 +1,32 @@
 
 import React, { useState } from "react";
 import { FormControl } from '@mui/material';
-
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import {
   Container,
+  Drawer,
   TextField,
   Button,
   Typography,
   Radio,
+  AppBar,
+  Toolbar,
   RadioGroup,
   FormControlLabel,
   FormLabel,
+  ListItem,
+  ListItemText,
+  List,
+  Box
 } from "@mui/material";
 import { Link, useHistory  } from "react-router-dom";
 
 function Registration() {
+  const drawerWidth = 240;
   const [formData, setFormData] = useState({
-    username: "",
+    name: "",
     email: "",
-    password: "",
     phoneNumber: "",
     dob: "",
     gender: "",
@@ -29,8 +36,7 @@ function Registration() {
     emergencyContactPhoneNumber: "",
   });
 
-  const history = useHistory();
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -39,14 +45,18 @@ function Registration() {
     }));
   };
 
+  
+  const navigate = (path) => {
+    history.push(path);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
 
     // Construct the payload
     const payload = {
-      username: formData.username,
+      name: formData.name,
       email: formData.email,
-      password: formData.password,
       phoneNumber: formData.phoneNumber,
       dob: formData.dob,
       gender: formData.gender,
@@ -71,23 +81,71 @@ function Registration() {
         return response.json();
       })
       .then((data) => {
-        console.log(data); // Handle the response data
-        history.push("/login"); // Redirect to the login page upon successful registration
+        console.log(data); 
+        setIsRegistered(true);
+        // history.push("/");
       })
       .catch((error) => {
         console.error("There was an error registering the user:", error);
+        setIsRegistered(false);      
       });
+  };
+  const [isRegistered, setIsRegistered] = useState(false);
+  const history = useHistory();
+
+  const onNavigateBack = () => {
+    history.goBack(); 
+  };
+
+
+  const onLogout = () => {
+    // Clear the token or user data from localStorage or your state management
+    localStorage.removeItem("accessToken");
+
+    // Redirect to the login page
+    history.push("/login");
   };
 
   return (
+    <div>
+      <AppBar 
+      position="fixed"
+      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Hospital Dashboard
+          </Typography>
+          <Button color="inherit" onClick={onLogout} sx={{ position: 'absolute', right: 10 }}>
+            Logout
+          </Button>
+        </Toolbar>
+      </AppBar>
+
+
+        <Toolbar />
+        
+      <Box sx={{ pt: 1}}>
+      <Button startIcon={<ArrowBackIcon />} onClick={onNavigateBack} sx={{ my: 2 }}>
+            Back
+          </Button>
     <Container maxWidth="xs" style={{ marginTop: "20px" }}>
-      <form>
+      <form onSubmit={handleSubmit}>
         <Typography
           variant="h5"
           style={{ marginBottom: "20px", textAlign: "center" }}
         >
           Register
         </Typography>
+        <TextField
+          name="name"
+          label="Name"
+          variant="outlined"
+          fullWidth
+          required
+          margin="normal"
+          value={formData.namel}
+          onChange={handleChange}
+        />
         <TextField
           name="email"
           label="Email"
@@ -96,18 +154,6 @@ function Registration() {
           required
           margin="normal"
           value={formData.email}
-          onChange={handleChange}
-        />
-
-        <TextField
-          name="password"
-          label="Password"
-          type="password"
-          variant="outlined"
-          fullWidth
-          required
-          margin="normal"
-          value={formData.password}
           onChange={handleChange}
         />
 
@@ -214,11 +260,23 @@ function Registration() {
         >
           Register
         </Button>
-        <Typography variant="body1" style={{ textAlign: "center" }}>
-          Already registered? <Link to="/login">Sign in</Link>
-        </Typography>
+        {isRegistered && (
+            <Typography variant="body1" style={{ color: "green", textAlign: "center" }}>
+              Patient Registered Successfully!
+            </Typography>
+        )}
       </form>
+     
     </Container>
+    </Box>
+    <footer className="footer">
+          <Typography variant="body2" color="textSecondary" align="center">
+            &copy; {new Date().getFullYear()} Hospital Name. All rights
+            reserved.
+          </Typography>
+        </footer>
+    </div>
+    
   );
 }
 
