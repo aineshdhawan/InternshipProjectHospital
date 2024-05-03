@@ -93,6 +93,10 @@ app.post("/login", (req, res) => {
     `;
 
   db.query(query, [username, password], (err, results) => {
+    if (!db || db.state === 'disconnected') {
+      return res.status(503).json({ message: "Database is currently offline. Please try again later." });
+    }
+
     if (err) {
       console.error(err);
       res.status(500).json({ message: "Error checking user credentials" });
