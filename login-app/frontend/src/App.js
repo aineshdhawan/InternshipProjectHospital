@@ -32,7 +32,7 @@ function App() {
         />
         <Route path="/register" component={Registration} />
         <Route path="/appointments" component={AppointmentsPage} />
-        <Route path="/create-appointment" component={CreateAppointmentForm} />
+        <Route path="/create-appointment/:patientId" component={CreateAppointmentForm} />
         <ProtectedRoute path="/home" component={HomePage} user={user} />
         <Route path="/patients/:patientId" component={PatientDetails} />
         {/* redirect based on status */}

@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 
 function PatientDetails({ patient }) {
@@ -48,6 +49,10 @@ function PatientDetails({ patient }) {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigateToCreateAppointment = () => {
+    history.push("/create-appointment/${patientId}");
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -149,236 +154,167 @@ function PatientDetails({ patient }) {
     return <Typography>Could not find patient details.</Typography>;
   }
 
-  return (
-    <div>
-      <AppBar position="fixed">
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Hospital Dashboard
-          </Typography>
-          <Button
-            color="inherit"
-            onClick={onLogout}
-            sx={{ position: "absolute", right: 10 }}
-          >
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
-      {/* Box component to avoid overlap with content below AppBar */}
 
-      <Box sx={{ pt: 8 }}>
-        <Container>
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={onNavigateBack}
-            sx={{ my: 2 }}
-          >
-            Back
-          </Button>
-          <Typography variant="h4" gutterBottom>
+return (
+  <Box sx={{ flexGrow: 1, p: 3 }}>
+    <AppBar position="fixed">
+      <Toolbar>
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          Hospital Dashboard
+        </Typography>
+        <Button onClick={onNavigateBack} color="inherit" sx={{ position: "absolute", right: 10 }}>
+          Logout
+        </Button>
+      </Toolbar>
+    </AppBar>
+    <Grid container spacing={2} sx={{ pt: 10 }}>
+      <Grid item xs={4}>
+        <Paper elevation={3} sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom>
             Patient Details
           </Typography>
-          <Paper elevation={3} sx={{ p: 2 }}>
-            <form noValidate autoComplete="off">
-              {/* Changed the TextField components */}
-              <TextField
-                label="Name"
-                name="name"
-                fullWidth
-                margin="normal"
-                value={patientDetails.name}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-              <TextField
-                label="E-Mail"
-                name="email"
-                fullWidth
-                margin="normal"
-                value={patientDetails.email}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-              <TextField
-                label="Phone Number"
-                name="phoneNumber"
-                fullWidth
-                margin="normal"
-                value={patientDetails.phoneNumber}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-              <TextField
-                label="Email"
-                name="email"
-                fullWidth
-                margin="normal"
-                value={patientDetails.email}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-
-              <TextField
-                label="DOB"
-                name="dob"
-                fullWidth
-                margin="normal"
-                value={patientDetails.dob ? new Date(patientDetails.dob).toLocaleDateString() : ''}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-
-              <TextField
-                label="Gender"
-                name="gender"
-                fullWidth
-                margin="normal"
-                value={patientDetails.gender}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-
-              <TextField
-                label="Address"
-                name="address"
-                fullWidth
-                margin="normal"
-                value={patientDetails.address}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-
-              <TextField
-                label="Emergency Contact Name"
-                name="emergencyContactName"
-                fullWidth
-                margin="normal"
-                value={patientDetails.emergencyContactName}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-
-              <TextField
-                label="Emergency Contact Relation"
-                name="emergencyContactRelation"
-                fullWidth
-                margin="normal"
-                value={patientDetails.emergencyContactRelation}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-
-              <TextField
-                label="Emergency Contact Phone Number"
-                name="emergencyContactPhoneNumber"
-                fullWidth
-                margin="normal"
-                value={patientDetails.emergencyContactPhoneNumber}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-              <TextField
-                label="Medical History"
-                name="medical_history"
-                fullWidth
-                margin="normal"
-                multiline
-                rows={4}
-                value={patientDetails.medical_history}
-                onChange={handleInputChange}
-                InputProps={{
-                  readOnly: !isEditing,
-                  style: {
-                    borderBottom: isEditing ? "5px solid blue" : "none",
-                  },
-                }}
-              />
-              {isEditing ? (
-                <>
-                  <Button
-                    startIcon={<SaveIcon />}
-                    variant="contained"
-                    color="primary"
-                    onClick={saveDetails}
-                    sx={{ mt: 2 }}
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={handleCancel}
-                    sx={{ mt: 2, ml: 2 }}
-                  >
-                    Cancel
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  startIcon={<EditIcon />}
-                  variant="contained"
-                  onClick={handleEdit}
-                  sx={{ mt: 2 }}
-                >
-                  Edit
-                </Button>
-              )}
-            </form>
-          </Paper>
-        </Container>
-      </Box>
-    </div>
-  );
+          <TextField
+            label="Name"
+            name="name"
+            fullWidth
+            margin="normal"
+            value={patientDetails.name}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          <TextField
+            label="Email"
+            name="email"
+            fullWidth
+            margin="normal"
+            value={patientDetails.email}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          <TextField
+            label="Phone Number"
+            name="phoneNumber"
+            fullWidth
+            margin="normal"
+            value={patientDetails.phoneNumber}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          <TextField
+            label="Date of Birth"
+            name="dob"
+            fullWidth
+            margin="normal"
+            value={patientDetails.dob}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          <TextField
+            label="Gender"
+            name="gender"
+            fullWidth
+            margin="normal"
+            value={patientDetails.gender}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          <TextField
+            label="Address"
+            name="address"
+            fullWidth
+            margin="normal"
+            value={patientDetails.address}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          <TextField
+            label="Emergency Contact Name"
+            name="emergencyContactName"
+            fullWidth
+            margin="normal"
+            value={patientDetails.emergencyContactName}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          <TextField
+            label="Emergency Contact Relation"
+            name="emergencyContactRelation"
+            fullWidth
+            margin="normal"
+            value={patientDetails.emergencyContactRelation}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          <TextField
+            label="Emergency Contact Phone Number"
+            name="emergencyContactPhoneNumber"
+            fullWidth
+            margin="normal"
+            value={patientDetails.emergencyContactPhoneNumber}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          <TextField
+            label="Medical History"
+            name="medical_history"
+            fullWidth
+            margin="normal"
+            multiline
+            rows={4}
+            value={patientDetails.medical_history}
+            onChange={handleInputChange}
+            InputProps={{
+              readOnly: !isEditing,
+            }}
+          />
+          {isEditing ? (
+            <>
+              <Button startIcon={<SaveIcon />} variant="contained" color="primary" onClick={saveDetails} sx={{ mt: 2 }}>
+                Save
+              </Button>
+              <Button variant="outlined" onClick={handleCancel} sx={{ mt: 2, ml: 2 }}>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button startIcon={<EditIcon />} variant="contained" onClick={handleEdit} sx={{ mt: 2 }}>
+              Edit
+            </Button>
+          )}
+        </Paper>
+      </Grid>
+      <Grid item xs={8}>
+        <Paper elevation={3} sx={{ p: 2 }}>
+          <Button startIcon={<AddIcon />} variant="contained" sx={{ mb: 2 }} onClick={navigateToCreateAppointment}>
+            Create New Appointment
+          </Button>
+          <Typography variant="h6" gutterBottom>
+            Upcoming Appointments
+          </Typography>
+          {/* List appointments here */}
+        </Paper>
+      </Grid>
+    </Grid>
+  </Box>
+);
 }
 
 export default PatientDetails;

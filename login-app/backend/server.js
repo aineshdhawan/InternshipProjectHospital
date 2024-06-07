@@ -355,30 +355,88 @@ app.get('/appointments', (req, res) => {
   });
 });
 
+// DOCTOR SCHEDULING BACKEND
+const dayOfWeekMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+app.get('/api/doctors/:doctorId/available-slots', (req, res) => {
+  const doctorId = req.params.doctorId;
+  const selectedDate = new Date(req.query.date);
+  const dayOfWeek = dayOfWeekMap[selectedDate.getDay()]; // Map to ENUM value
+
+  const query = "SELECT availability_start, availability_end FROM doctor_availability WHERE doctor_id = ? AND day_of_week = ?";
+  db.query(query, [doctorId, dayOfWeek], (err, results) => {
+    if (err) {
+      res.status(500).json({"error": err.message});
+      return;
+    }
+    if (results.some(result => result.availability_start === null)) {
+      res.json({ message: "No availability on this day." });
+    } else {
+      const availableSlots = generateTimeSlots(results);
+      res.json({
+        doctorId,
+        date: req.query.date,
+        availableSlots
+      });
+    }
+  });
+});
+
+function generateTimeSlots(availability) {
+  let slots = [];
+  availability.forEach(({ availability_start, availability_end }) => {
+    if (availability_start && availability_end) {
+      let startTime = new Date(`1970/01/01 ${availability_start}`);
+      let endTime = new Date(`1970/01/01 ${availability_end}`);
+
+      while (startTime < endTime) {
+        slots.push(formatTime(startTime));
+        startTime.setHours(startTime.getHours() + 1);
+      }
+    }
+  });
+  return slots;
+}
+
+function formatTime(date) {
+  return date.toTimeString().substring(0, 5);
+}
+
+
 // GET /api/doctors - Fetches a list of doctors
 app.get('/api/doctors', (req, res) => {
-  let sqlQuery = 'SELECT id, name, specialty FROM doctors';
-  const { name } = req.query;
-
-  if (name) {
-      sqlQuery += ' WHERE name LIKE ?';
-      db.query(sqlQuery, [`%${name}%`], (error, results) => {
-          if (error) {
-              res.status(500).send('Error fetching doctors from database');
-              return;
-          }
-          res.json(results);
-      });
-  } else {
-      db.query(sqlQuery, (error, results) => {
-          if (error) {
-              res.status(500).send('Error fetching doctors from database');
-              return;
-          }
-          res.json(results);
-      });
-  }
+  const sqlQuery = 'SELECT id, name, specialty FROM doctors';
+  db.query(sqlQuery, (error, results) => {
+    if (error) {
+      res.status(500).send('Error fetching doctors from database');
+      return;
+    }
+    res.json(results);
+  });
 });
+// app.get('/api/doctors', (req, res) => {
+//   let sqlQuery = 'SELECT id, name, specialty FROM doctors';
+//   const { name } = req.query;
+
+//   if (name) {
+//       sqlQuery += ' WHERE name LIKE ?';
+//       db.query(sqlQuery, [`%${name}%`], (error, results) => {
+//           if (error) {
+//               res.status(500).send('Error fetching doctors from database');
+//               return;
+//           }
+//           res.json(results);
+//       });
+//   } else {
+//       db.query(sqlQuery, (error, results) => {
+//           if (error) {
+//               res.status(500).send('Error fetching doctors from database');
+//               return;
+//           }
+//           res.json(results);
+//       });
+//   }
+// });
 
 
 app.listen(PORT, () => {
