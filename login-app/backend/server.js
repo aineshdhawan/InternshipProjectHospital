@@ -94,7 +94,7 @@ app.post("/login", (req, res) => {
 
   db.query(query, [username, password], (err, results) => {
     if (!db || db.state === 'disconnected') {
-      return res.status(503).json({ message: "Database is currently offline. Please try again later." });
+      return res.status(503).json({ message: "Database is currently unavailable. Please try again later." });
     }
 
     if (err) {
@@ -145,20 +145,38 @@ app.post("/login", (req, res) => {
 // });
 
 app.get("/patients/search", (req, res) => {
-  const { searchQuery } = req.query;
+  // Initially receive the values from the query parameters
+  let { searchQuery, page, pageSize } = req.query;
+
+  // Provide default values and ensure they are integers
+  page = parseInt(page || 1, 10);  // Default to 1 if page is undefined or null
+  pageSize = parseInt(pageSize || 10, 10);  // Default to 10 if pageSize is undefined or null
+
+
+  if (page < 1) {
+    page = 1;
+  }
+
+  // Validate to ensure page and pageSize are positive integers
+  page = Math.max(page, 1);  // Ensures page is at least 1
+  pageSize = Math.max(pageSize, 1);  // Ensures pageSize is at least 1
+
+  // Calculate the offset
+  const offset = (page - 1) * pageSize;
 
   const query = `
-    SELECT * FROM patients 
-    WHERE id = ? OR contact_info LIKE ?;
+    SELECT * FROM patient2 
+    WHERE id = ? OR phoneNumber LIKE ?
+    ORDER BY id ASC
+    LIMIT ?
+    OFFSET ?;
   `;
 
-  // % partial match
-  db.query(query, [searchQuery, `%${searchQuery}%`], (err, results) => {
+  // Execute the query with the correct parameters for LIMIT and OFFSET
+  db.query(query, [searchQuery, `%${searchQuery}%`, pageSize, offset], (err, results) => {
     if (err) {
       console.error(err);
-      return res
-        .status(500)
-        .json({ message: "Error retrieving patient data", error: err });
+      return res.status(500).json({ message: "Error retrieving patient data", error: err });
     }
     res.json(results);
   });
@@ -167,7 +185,7 @@ app.get("/patients/search", (req, res) => {
 app.get("/patients/:patientId", (req, res) => {
   const { patientId } = req.params;
   console.log(`Fetching details for patientId: ${patientId}`);
-  const query = "SELECT * FROM patients WHERE id = ?";
+  const query = "SELECT * FROM patient2 WHERE id = ?";
 
   db.query(query, [patientId], (err, results) => {
     console.log(results);
@@ -185,17 +203,17 @@ app.get("/patients/:patientId", (req, res) => {
   });
 });
 
-const updatePatientDetails = (id, { name, contact_info, medical_history }) => {
+const updatePatientDetails = (id, { name, email, phoneNumber, dob, gender, address, emergencyContactName, emergencyContactPhoneNumber, emergencyContactRelation}) => {
   return new Promise((resolve, reject) => {
     const query = `
-      UPDATE patients 
-      SET name = ?, contact_info = ?, medical_history = ?
+      UPDATE patient2 
+      SET name = ?, email = ?, phoneNumber = ?, dob = ?, gender, ?, address = ?, emergencyContactName = ?, emergencyContactRelation = ?, emergencyContactPhoneNumber = ?
       WHERE id = ?;
     `;
 
     db.query(
       query,
-      [name, contact_info, medical_history, id],
+      [name, email, phoneNumber, dob, gender, address, emergencyContactName, emergencyContactPhoneNumber, emergencyContactRelation, id],
       (error, results) => {
         if (error) {
           return reject(error);
@@ -211,11 +229,11 @@ const updatePatientDetails = (id, { name, contact_info, medical_history }) => {
 
 app.put("/patients/:id", (req, res) => {
   const { id } = req.params;
-  const { name, contact_info, medical_history } = req.body;
+  const { name, email, phoneNumber, dob, gender, address, emergencyContactName, emergencyContactPhoneNumber, emergencyContactRelation} = req.body;
 
   console.log(req.body);
 
-  updatePatientDetails(id, { name, contact_info, medical_history })
+  updatePatientDetails(id, { name, email, phoneNumber, dob, gender, address, emergencyContactName, emergencyContactPhoneNumber, emergencyContactRelation })
     .then(() => res.json({ message: "Patient details updated successfully" }))
     .catch((error) =>
       res.status(500).json({ message: "Error updating patient details", error })
@@ -337,6 +355,30 @@ app.get('/appointments', (req, res) => {
   });
 });
 
+// GET /api/doctors - Fetches a list of doctors
+app.get('/api/doctors', (req, res) => {
+  let sqlQuery = 'SELECT id, name, specialty FROM doctors';
+  const { name } = req.query;
+
+  if (name) {
+      sqlQuery += ' WHERE name LIKE ?';
+      db.query(sqlQuery, [`%${name}%`], (error, results) => {
+          if (error) {
+              res.status(500).send('Error fetching doctors from database');
+              return;
+          }
+          res.json(results);
+      });
+  } else {
+      db.query(sqlQuery, (error, results) => {
+          if (error) {
+              res.status(500).send('Error fetching doctors from database');
+              return;
+          }
+          res.json(results);
+      });
+  }
+});
 
 
 app.listen(PORT, () => {

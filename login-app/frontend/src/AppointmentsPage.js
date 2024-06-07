@@ -2,6 +2,7 @@ import React from 'react';
 import { Container, Button,AppBar, Toolbar, Typography, List, ListItem, ListItemText, TextField, Drawer  } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import AppointmentList from './AppointmentList';
+import DoctorSelector from './DoctorSelector'; // Adjust the path as necessary based on your project structure
 
 
 function AppointmentsPage() {
@@ -73,8 +74,7 @@ function AppointmentsPage() {
       <Button variant="contained" color="primary" onClick={navigateToCreateAppointment}>
         Create New Appointment
       </Button>
-      <AppointmentList />
-  
+      <DoctorSelector />
     </Container></div>
   );
 }

@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
-import { FormControl } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { FormControl } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import {
   Container,
@@ -18,9 +17,9 @@ import {
   ListItem,
   ListItemText,
   List,
-  Box
+  Box,
 } from "@mui/material";
-import { Link, useHistory  } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 function Registration() {
   const drawerWidth = 240;
@@ -36,16 +35,23 @@ function Registration() {
     emergencyContactPhoneNumber: "",
   });
 
-  
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "email") {
+      if (value && !emailRegex.test(value)) {
+        setEmailError("Please enter a valid email address.");
+      } else {
+        setEmailError("");
+      }
+    }
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   };
 
-  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const navigate = (path) => {
     history.push(path);
   };
@@ -81,22 +87,23 @@ function Registration() {
         return response.json();
       })
       .then((data) => {
-        console.log(data); 
+        console.log(data);
         setIsRegistered(true);
         // history.push("/");
       })
       .catch((error) => {
         console.error("There was an error registering the user:", error);
-        setIsRegistered(false);      
+        setIsRegistered(false);
       });
   };
+
+  const [emailError, setEmailError] = useState("");
   const [isRegistered, setIsRegistered] = useState(false);
   const history = useHistory();
 
   const onNavigateBack = () => {
-    history.goBack(); 
+    history.goBack();
   };
-
 
   const onLogout = () => {
     // Clear the token or user data from localStorage or your state management
@@ -108,135 +115,155 @@ function Registration() {
 
   return (
     <div>
-      <AppBar 
-      position="fixed"
-      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <AppBar
+        position="fixed"
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Hospital Dashboard
           </Typography>
-          <Button color="inherit" onClick={onLogout} sx={{ position: 'absolute', right: 10 }}>
+          <Button
+            color="inherit"
+            onClick={onLogout}
+            sx={{ position: "absolute", right: 10 }}
+          >
             Logout
           </Button>
         </Toolbar>
       </AppBar>
 
+      <Toolbar />
 
-        <Toolbar />
-        
-      <Box sx={{ pt: 1}}>
-      <Button startIcon={<ArrowBackIcon />} onClick={onNavigateBack} sx={{ my: 2 }}>
-            Back
-          </Button>
-    <Container maxWidth="xs" style={{ marginTop: "20px" }}>
-      <form onSubmit={handleSubmit}>
-        <Typography
-          variant="h5"
-          style={{ marginBottom: "20px", textAlign: "center" }}
+      <Box sx={{ pt: 1 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={onNavigateBack}
+          sx={{ my: 2 }}
         >
-          Register
-        </Typography>
-        <TextField
-          name="name"
-          label="Name"
-          variant="outlined"
-          fullWidth
-          required
-          margin="normal"
-          value={formData.namel}
-          onChange={handleChange}
-        />
-        <TextField
-          name="email"
-          label="Email"
-          variant="outlined"
-          fullWidth
-          required
-          margin="normal"
-          value={formData.email}
-          onChange={handleChange}
-        />
+          Back
+        </Button>
+        <Container maxWidth="xs" style={{ marginTop: "20px" }}>
+          <form onSubmit={handleSubmit}>
+            <Typography
+              variant="h5"
+              style={{ marginBottom: "20px", textAlign: "center" }}
+            >
+              Register
+            </Typography>
+            <TextField
+              name="name"
+              label="Name"
+              variant="outlined"
+              fullWidth
+              required
+              margin="normal"
+              value={formData.namel}
+              onChange={handleChange}
+            />
+            <TextField
+              name="email"
+              label="Email"
+              variant="outlined"
+              fullWidth
+              required
+              margin="normal"
+              value={formData.email}
+              onChange={handleChange}
+              error={!!emailError}
+              helperText={emailError}
+            />
 
-        <TextField
-          name="phoneNumber"
-          label="Phone Number"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={formData.phoneNumber}
-          onChange={handleChange}
-        />
+            <TextField
+              name="phoneNumber"
+              label="Phone Number"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+            />
 
-        <TextField
-          name="dob"
-          label="Date of Birth"
-          type="date"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={formData.dob}
-          onChange={handleChange}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
+            <TextField
+              name="dob"
+              label="Date of Birth"
+              type="date"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={formData.dob}
+              onChange={handleChange}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
 
-<FormControl component="fieldset" style={{ marginBottom: "20px", marginTop: "20px" }}>
-          <FormLabel component="legend">Gender</FormLabel>
-          <RadioGroup
-            row
-            aria-label="gender"
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-          >
-            <FormControlLabel value="Female" control={<Radio />} label="Female" />
-            <FormControlLabel value="Male" control={<Radio />} label="Male" />
-          </RadioGroup>
-        </FormControl>
+            <FormControl
+              component="fieldset"
+              style={{ marginBottom: "20px", marginTop: "20px" }}
+            >
+              <FormLabel component="legend">Gender</FormLabel>
+              <RadioGroup
+                row
+                aria-label="gender"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+              >
+                <FormControlLabel
+                  value="Female"
+                  control={<Radio />}
+                  label="Female"
+                />
+                <FormControlLabel
+                  value="Male"
+                  control={<Radio />}
+                  label="Male"
+                />
+              </RadioGroup>
+            </FormControl>
 
+            <TextField
+              name="address"
+              label="Address"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={formData.address}
+              onChange={handleChange}
+            />
 
-        <TextField
-          name="address"
-          label="Address"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={formData.address}
-          onChange={handleChange}
-        />
+            <TextField
+              name="emergencyContactName"
+              label="Emergency Contact Name"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={formData.emergencyContactName}
+              onChange={handleChange}
+            />
 
-        <TextField
-          name="emergencyContactName"
-          label="Emergency Contact Name"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={formData.emergencyContactName}
-          onChange={handleChange}
-        />
+            <TextField
+              name="emergencyContactRelation"
+              label="Emergency Contact Relation"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={formData.emergencyContactRelation}
+              onChange={handleChange}
+            />
 
-        <TextField
-          name="emergencyContactRelation"
-          label="Emergency Contact Relation"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={formData.emergencyContactRelation}
-          onChange={handleChange}
-        />
+            <TextField
+              name="emergencyContactPhoneNumber"
+              label="Emergency Contact Phone Number"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={formData.emergencyContactPhoneNumber}
+              onChange={handleChange}
+            />
 
-        <TextField
-          name="emergencyContactPhoneNumber"
-          label="Emergency Contact Phone Number"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={formData.emergencyContactPhoneNumber}
-          onChange={handleChange}
-        />
-
-        {/* <TextField label="Username" variant="outlined" fullWidth required margin="normal" />
+            {/* <TextField label="Username" variant="outlined" fullWidth required margin="normal" />
         <TextField label="Email" variant="outlined" fullWidth required margin="normal" type="email" />
         <TextField label="Password" variant="outlined" fullWidth required margin="normal" type="password" />
         <TextField label="Personal Phone Number" variant="outlined" fullWidth required margin="normal" />
@@ -251,32 +278,32 @@ function Registration() {
         <TextField label="Emergency Contact Name" variant="outlined" fullWidth required margin="normal" />
         <TextField label="Emergency Contact Relation" variant="outlined" fullWidth required margin="normal" />
         <TextField label="Emergency Contact Phone Number" variant="outlined" fullWidth required margin="normal" /> */}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="primary"
-          style={{ marginTop: "30px", marginBottom: "20px" }}
-        >
-          Register
-        </Button>
-        {isRegistered && (
-            <Typography variant="body1" style={{ color: "green", textAlign: "center" }}>
-              Patient Registered Successfully!
-            </Typography>
-        )}
-      </form>
-     
-    </Container>
-    </Box>
-    <footer className="footer">
-          <Typography variant="body2" color="textSecondary" align="center">
-            &copy; {new Date().getFullYear()} Hospital Name. All rights
-            reserved.
-          </Typography>
-        </footer>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              style={{ marginTop: "30px", marginBottom: "20px" }}
+            >
+              Register
+            </Button>
+            {isRegistered && (
+              <Typography
+                variant="body1"
+                style={{ color: "green", textAlign: "center" }}
+              >
+                Patient Registered Successfully!
+              </Typography>
+            )}
+          </form>
+        </Container>
+      </Box>
+      <footer className="footer">
+        <Typography variant="body2" color="textSecondary" align="center">
+          &copy; {new Date().getFullYear()} Hospital Name. All rights reserved.
+        </Typography>
+      </footer>
     </div>
-    
   );
 }
 

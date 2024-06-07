@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useHistory } from 'react-router-dom';
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-
+import { useHistory } from "react-router-dom";
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
 import {
   TextField,
@@ -19,7 +18,7 @@ import "./Login.css";
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState("");
   const [error, setError] = useState("");
   let history = useHistory();
 
@@ -34,16 +33,32 @@ function Login({ onLogin }) {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status === 503) {
+          setError(
+            "Database is currently unavailable. Please try again later."
+          );
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        } 
+      }
+      if (
+        error === "Database is currently unavailable. Please try again later."
+      ) {
+        <Typography variant="body2" className="server-error-message">
+          {error}
+        </Typography>;
       }
       const { accessToken } = await response.json();
       localStorage.setItem("accessToken", accessToken); // Store the token
       onLogin(true); // Update the parent component or context provider
-      history.push('/home');
-
+      history.push("/home");
     } catch (error) {
-      console.error("Fetch error: " + error.message);
-      setError("Incorrect Username or Password. Please try again.");
+      if (error.message === 'Failed to fetch') {
+        setError('Server not available. Please contact IT Admin.');
+      } else {
+        console.error("Fetch error: " + error.message);
+        setError("Incorrect Username or Password. Please try again.");
+      }
       onLogin(false);
     }
   };
@@ -145,4 +160,3 @@ function Login({ onLogin }) {
   );
 }
 export default Login;
-
