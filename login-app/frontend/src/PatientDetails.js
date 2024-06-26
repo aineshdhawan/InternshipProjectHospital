@@ -22,7 +22,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 function PatientDetails({ patient }) {
   let history = useHistory();
-  const { patientId } = useParams(); // Extract the patient ID from the URL
+  const { patientId } = useParams(); 
   const [isEditing, setIsEditing] = useState(false);
 
   const handleEdit = () => {
@@ -30,8 +30,8 @@ function PatientDetails({ patient }) {
   };
 
   const handleCancel = () => {
-    setIsEditing(false); // Exit edit mode without saving
-    // Optionally reset the form to initial values here
+    setIsEditing(false); 
+
   };
 
   const [patientDetails, setPatientDetails] = useState({
@@ -51,7 +51,8 @@ function PatientDetails({ patient }) {
   const [error, setError] = useState(null);
 
   const navigateToCreateAppointment = () => {
-    history.push("/create-appointment/${patientId}");
+    console.log(patientId);
+    history.push(`/create-appointment/${patientId}`);
   };
 
   const handleInputChange = (e) => {

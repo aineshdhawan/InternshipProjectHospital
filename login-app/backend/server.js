@@ -3,6 +3,8 @@ const app = express();
 const PORT = 3001;
 const mysql = require("mysql");
 const jwt = require("jsonwebtoken");
+const moment = require('moment');
+
 
 app.use(express.json());
 
@@ -260,10 +262,10 @@ app.get("/protected", authenticateToken, (req, res) => {
 
 //calcTimeSlot Function
 
-const timeSlots = {
-  morning: { start: "09:00:00", end: "12:00:00" },
-  evening: { start: "13:00:00", end: "16:00:00" },
-};
+// const timeSlots = {
+//   morning: { start: "09:00:00", end: "12:00:00" },
+//   evening: { start: "13:00:00", end: "16:00:00" },
+// };
 
 function addMinutes(time, minutes) {
   const parts = time.split(':');
@@ -358,50 +360,63 @@ app.get('/appointments', (req, res) => {
 // DOCTOR SCHEDULING BACKEND
 const dayOfWeekMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-app.get('/api/doctors/:doctorId/available-slots', (req, res) => {
-  const doctorId = req.params.doctorId;
-  const selectedDate = new Date(req.query.date);
-  const dayOfWeek = dayOfWeekMap[selectedDate.getDay()]; // Map to ENUM value
 
-  const query = "SELECT availability_start, availability_end FROM doctor_availability WHERE doctor_id = ? AND day_of_week = ?";
-  db.query(query, [doctorId, dayOfWeek], (err, results) => {
-    if (err) {
-      res.status(500).json({"error": err.message});
-      return;
-    }
-    if (results.some(result => result.availability_start === null)) {
-      res.json({ message: "No availability on this day." });
-    } else {
-      const availableSlots = generateTimeSlots(results);
-      res.json({
-        doctorId,
-        date: req.query.date,
-        availableSlots
+
+
+
+app.get('/api/doctors/:doctorId/availability', (req, res) => {
+  const { doctorId } = req.params;
+  const { date } = req.query; // Expecting 'YYYY-MM-DD' format
+
+  if (!date) {
+      return res.status(400).json({ error: "Date parameter is required." });
+  }
+
+  const dayOfWeek = moment(date, 'YYYY-MM-DD').format('dddd'); // Convert date to day of the week
+
+  // Fetch doctor availability from the database
+  db.query('SELECT availability_start, availability_end FROM doctor_availability WHERE doctor_id = ? AND day_of_week = ?', [doctorId, dayOfWeek], (err, results) => {
+      if (err) {
+          return res.status(500).json({ error: err.message });
+      }
+      if (results.length === 0) {
+          return res.status(404).json({ message: 'No availability data found for this doctor on the specified day.' });
+      }
+
+      const { availability_start, availability_end } = results[0];
+      const allSlots = generateTimeSlots(availability_start, availability_end);
+
+      // Fetch booked slots
+      db.query('SELECT time_slot_start FROM appointments WHERE doctor_id = ? AND appointment_date = ?', [doctorId, date], (err, bookedResults) => {
+          if (err) {
+              return res.status(500).json({ error: err.message });
+          }
+
+          const bookedSlots = bookedResults.map(slot => moment(slot.time_slot, 'HH:mm:ss').format('HH:mm'));
+          const availableSlots = allSlots.filter(slot => !bookedSlots.includes(slot));
+
+          res.json({ availableSlots });
       });
-    }
   });
 });
 
-function generateTimeSlots(availability) {
+function generateTimeSlots(startTime, endTime) {
   let slots = [];
-  availability.forEach(({ availability_start, availability_end }) => {
-    if (availability_start && availability_end) {
-      let startTime = new Date(`1970/01/01 ${availability_start}`);
-      let endTime = new Date(`1970/01/01 ${availability_end}`);
+  let start = moment(startTime, 'HH:mm:ss');
+  const end = moment(endTime, 'HH:mm:ss');
 
-      while (startTime < endTime) {
-        slots.push(formatTime(startTime));
-        startTime.setHours(startTime.getHours() + 1);
-      }
-    }
-  });
+  while (start < end) {
+      slots.push(start.format('HH:mm'));
+      start = start.add(1, 'hours'); // Increment by one hour
+  }
+
   return slots;
 }
 
 function formatTime(date) {
   return date.toTimeString().substring(0, 5);
 }
-
+ 
 
 // GET /api/doctors - Fetches a list of doctors
 app.get('/api/doctors', (req, res) => {

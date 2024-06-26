@@ -1,5 +1,6 @@
 import moment from 'moment';
 import React, { useState, useEffect } from 'react';
+import { useParams } from "react-router-dom";
 import {
   Container, Typography, Button, Select, MenuItem, FormControl, InputLabel,
   TextField, Checkbox, FormGroup, FormControlLabel, CircularProgress, Grid
@@ -14,7 +15,7 @@ function CreateAppointmentForm() {
   const [appointmentDetails, setAppointmentDetails] = useState({
     type: '',
     doctorId: '',
-    date: moment(),  // Use moment() for initialization
+    date: moment(),  
     time: moment(),
     specialRequirements: '',
     needsWheelchairAccess: false,
@@ -23,10 +24,13 @@ function CreateAppointmentForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const history = useHistory();
+  const { patientId } = useParams(); 
+  const [availableSlots, setAvailableSlots] = useState([]);
 
   useEffect(() => {
+
     setLoading(true);
-    fetch('http://localhost:3001/api/doctors')  // Ensure the URL matches your backend configuration
+    fetch('http://localhost:3001/api/doctors')  
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response not ok');
@@ -42,7 +46,25 @@ function CreateAppointmentForm() {
       setError('Failed to load doctors');
       setLoading(false);
     });
-}, []);
+    if (appointmentDetails.doctorId && appointmentDetails.date) {
+      const formattedDate = appointmentDetails.date.format('YYYY-MM-DD'); // Format date for the backend
+      const url = `http://localhost:3001/api/doctors/${appointmentDetails.doctorId}/availability?date=${formattedDate}`;
+  
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if (data.availableSlots) {
+            setAvailableSlots(data.availableSlots);
+          } else {
+            setAvailableSlots([]); // handle cases where no slots are available
+          }
+        })
+        .catch(error => {
+          console.error('Failed to fetch available time slots:', error);
+          setAvailableSlots([]);
+        });
+    }
+}, [appointmentDetails.doctorId, appointmentDetails.date]);
 
 const handleChange = (event) => {
   const { name, value } = event.target;
@@ -59,10 +81,11 @@ const handleDateChange = (newValue) => {
   }));
 };
 
-const handleTimeChange = (newValue) => {
+
+const handleTimeChange = (slot) => {
   setAppointmentDetails(prev => ({
-      ...prev,
-      time: newValue,
+    ...prev,
+    time: moment(slot, 'HH:mm'), // Assume slots are in 'HH:mm' format
   }));
 };
 
@@ -72,7 +95,14 @@ const handleTimeChange = (newValue) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(appointmentDetails);
+    const formattedDetails = {
+      ...appointmentDetails,
+      date: appointmentDetails.date.format('YYYY-MM-DD'),
+      time: appointmentDetails.time.format('HH:mm'),
+    };
+    
+    console.log(formattedDetails); 
+
     fetch('http://localhost:3001/appointments', {
       method: 'POST',
       headers: {
@@ -164,7 +194,7 @@ const handleTimeChange = (newValue) => {
         Available Time Slots
       </Typography>
       <div style={{ margin: 20 }}>
-      <TimeSlots />
+      <TimeSlots availableSlots={availableSlots} onSelectSlot={handleTimeChange} />
     </div>
     </div>
 
